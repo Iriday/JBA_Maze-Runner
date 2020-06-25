@@ -6,9 +6,24 @@ import java.util.stream.Collectors;
 public class MazeGenerator {
     public static List<StringBuilder> generateMaze(int rows, int cols) {
         if (rows < 3 || cols < 3) throw new IllegalArgumentException("rows/cols should be >= 3");
-        if (rows % 2 != 1 || cols % 2 != 1) throw new IllegalArgumentException("rows/cols should be odd");
 
-        int[][] graph = numerateNodes(new int[rows / 2 + 1][cols / 2 + 1]);
+        boolean addRow = false;
+        boolean addCol = false;
+
+        int rowsOptimized = rows / 2;
+        int colsOptimized = cols / 2;
+        if (rows % 2 == 1) {
+            rowsOptimized++;
+        } else {
+            addRow = true;
+        }
+        if (cols % 2 == 1) {
+            colsOptimized++;
+        } else {
+            addCol = true;
+        }
+
+        int[][] graph = numerateNodes(new int[rowsOptimized][colsOptimized]);
         List<int[]> weights = createAdjacencyListAndConnectNodesHorizontallyAndVerticallyWithRandWeights(graph);
         makeBordersSolid(graph, weights);
         makeRandEntrance(graph, weights);
@@ -18,7 +33,33 @@ public class MazeGenerator {
         minimumSpanningTreeOf(weights, minSpanTree);
         makeRandExit(graph, minSpanTree);
 
-        return buildMaze(graph, minSpanTree);
+
+        List<StringBuilder> maze = buildMaze(graph, minSpanTree);
+        if (addRow) {
+            addAdditionalRow(maze);
+        }
+        if (addCol) {
+            addAdditionalCol(maze);
+        }
+        return maze;
+    }
+
+    private static void addAdditionalRow(List<StringBuilder> maze) {
+        var rand = new Random();
+        while (true) {
+            int randRow = rand.nextInt(maze.size());
+            if (maze.get(randRow).charAt(0) != ' ' && maze.get(randRow).charAt(maze.get(randRow).length() - 1) != ' ') {
+                maze.add(randRow, new StringBuilder(maze.get(randRow)));
+                break;
+            }
+        }
+    }
+
+    private static void addAdditionalCol(List<StringBuilder> maze) {
+        int randCol = new Random().nextInt(maze.get(0).length());
+        for (StringBuilder sb : maze) {
+            sb.insert(randCol, sb.charAt(randCol));
+        }
     }
 
     private static int[][] numerateNodes(int[][] graph) {
@@ -148,7 +189,9 @@ public class MazeGenerator {
                 }
             }
             mazeBuilder.add(firstRow);
-            mazeBuilder.add(secondRow);
+            if (i + 1 != graph.length) {
+                mazeBuilder.add(secondRow);
+            }
         }
         return mazeBuilder;
     }

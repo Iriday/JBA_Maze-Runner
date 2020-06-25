@@ -15,7 +15,7 @@ public class View {
                 if (elem == ' ') {
                     System.out.print("  ");
                 } else {
-                    System.out.print("##");
+                    System.out.print("##"); // or change to - "\u2588\u2588"
                 }
             }
             System.out.println();
@@ -24,14 +24,12 @@ public class View {
 
     public static int[] getMazeSizeFromConsole() {
         var scn = new Scanner(System.in);
-        System.out.println("Please, enter the size of a maze (odd nums):");
+        System.out.println("Please, enter the size of a maze:");
         while (true) {
             int rows = scn.nextInt();
             int cols = scn.nextInt();
             if (rows < 3 || cols < 3) {
                 System.out.println("Incorrect input, maze size should be at least 3x3, please try again.");
-            } else if (rows % 2 != 1 || cols % 2 != 1) {
-                System.out.println("Incorrect input, number of rows and cols should be odd, please try again.");
             } else {
                 return new int[]{rows, cols};
             }
