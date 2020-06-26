@@ -1,19 +1,23 @@
 package maze;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class View {
     private List<StringBuilder> lastMaze;
 
     public void run() {
         var scn = new Scanner(System.in);
-        initialMainMenu(scn);
-        mainMenu(scn);
+        firstMainMenu(scn);
+        secondMainMenu(scn);
     }
 
-    private void initialMainMenu(Scanner scn) {
+    private void firstMainMenu(Scanner scn) {
         while (true) {
             System.out.println("=== Menu ===\n"
                     + "1. Generate a new maze\n"
@@ -27,7 +31,15 @@ public class View {
                     System.out.println();
                     return;
                 }
-                case "2" -> System.out.println("Not implemented yet, coming soon.");
+                case "2" -> {
+                    try {
+                        lastMaze = loadMazeFromFile(getFilePathFromConsole(scn));
+                        System.out.println();
+                        return;
+                    } catch (IOException e) {
+                        System.out.println("Error something went wrong!");
+                    }
+                }
                 case "0" -> System.exit(0);
                 default -> System.out.println("Incorrect option, please try again.");
             }
@@ -35,7 +47,7 @@ public class View {
         }
     }
 
-    private void mainMenu(Scanner scn) {
+    private void secondMainMenu(Scanner scn) {
         while (true) {
             System.out.println("== Menu ==\n"
                     + "1. Generate a new maze\n"
@@ -49,7 +61,20 @@ public class View {
                     lastMaze = generateNewMaze(scn);
                     printMaze(lastMaze);
                 }
-                case "2", "3" -> System.out.println("Not implemented yet, coming soon.");
+                case "2" -> {
+                    try {
+                        lastMaze = loadMazeFromFile(getFilePathFromConsole(scn));
+                    } catch (IOException e) {
+                        System.out.println("Error, something went wrong!");
+                    }
+                }
+                case "3" -> {
+                    try {
+                        saveMazeToFile(lastMaze, getFilePathFromConsole(scn));
+                    } catch (IOException e) {
+                        System.out.println("Error, something went wrong!");
+                    }
+                }
                 case "4" -> printMaze(lastMaze);
                 case "0" -> {
                     return;
@@ -60,9 +85,27 @@ public class View {
         }
     }
 
-    public static List<StringBuilder> generateNewMaze(Scanner scn) {
+    private List<StringBuilder> generateNewMaze(Scanner scn) {
         int[] size = getMazeSizeFromConsole(scn);
         return formatMaze(MazeGenerator.generateMaze(size[0], size[1]));
+    }
+
+    public static void saveMazeToFile(List<StringBuilder> maze, String filePath) throws IOException {
+        var mazeStr = new StringBuilder();
+        maze.forEach(row -> mazeStr.append(row).append("\n"));
+        Files.writeString(Path.of(filePath), mazeStr.toString().trim());
+    }
+
+    public static List<StringBuilder> loadMazeFromFile(String path) throws IOException {
+        return Files.readAllLines(Path.of(path))
+                .stream()
+                .map(StringBuilder::new)
+                .collect(Collectors.toList());
+    }
+
+    public static String getFilePathFromConsole(Scanner scn) {
+        System.out.println("Enter filepath:");
+        return scn.next().trim();
     }
 
     public static List<StringBuilder> formatMaze(List<StringBuilder> maze) {
