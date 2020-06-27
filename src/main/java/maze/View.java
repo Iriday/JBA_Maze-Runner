@@ -13,57 +13,36 @@ public class View {
 
     public void run() {
         var scn = new Scanner(System.in);
-        firstMainMenu(scn);
-        secondMainMenu(scn);
+        mainMenu(scn);
     }
 
-    private void firstMainMenu(Scanner scn) {
-        while (true) {
-            System.out.println("=== Menu ===\n"
-                    + "1. Generate a new maze\n"
-                    + "2. Load a maze\n"
-                    + "0. Exit");
-
-            switch (scn.next().trim()) {
-                case "1" -> {
-                    lastMaze = generateNewMaze(scn);
-                    printMaze(lastMaze);
-                    System.out.println();
-                    return;
-                }
-                case "2" -> {
-                    try {
-                        lastMaze = loadMazeFromFile(getFilePathFromConsole(scn));
-                        System.out.println();
-                        return;
-                    } catch (IOException e) {
-                        System.out.println("Error something went wrong!");
-                    }
-                }
-                case "0" -> System.exit(0);
-                default -> System.out.println("Incorrect option, please try again.");
-            }
-            System.out.println();
-        }
-    }
-
-    private void secondMainMenu(Scanner scn) {
+    private void mainMenu(Scanner scn) {
+        boolean mazeInitialized = false;
         while (true) {
             System.out.println("== Menu ==\n"
                     + "1. Generate a new maze\n"
-                    + "2. Load a maze\n"
-                    + "3. Save the maze\n"
-                    + "4. Display the maze\n"
-                    + "0. Exit");
+                    + "2. Load a maze");
+            if (mazeInitialized) {
+                System.out.println("3. Save the maze\n"
+                        + "4. Display the maze");
+            }
+            System.out.println("0. Exit");
 
-            switch (scn.next().trim()) {
+            String option = scn.next().trim();
+            if (!mazeInitialized && !(option.equals("1") || option.equals("2") || option.equals("0"))) {
+                System.out.println("Incorrect option, please try again.\n");
+                continue;
+            }
+            switch (option) {
                 case "1" -> {
                     lastMaze = generateNewMaze(scn);
                     printMaze(lastMaze);
+                    mazeInitialized = true;
                 }
                 case "2" -> {
                     try {
                         lastMaze = loadMazeFromFile(getFilePathFromConsole(scn));
+                        mazeInitialized = true;
                     } catch (IOException e) {
                         System.out.println("Error, something went wrong!");
                     }
