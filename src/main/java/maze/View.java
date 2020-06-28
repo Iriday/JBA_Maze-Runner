@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class View {
     private List<StringBuilder> lastMaze;
@@ -110,12 +111,17 @@ public class View {
     public static int[] getMazeSizeFromConsole(Scanner scn) {
         System.out.println("Please, enter the size of a maze:");
         while (true) {
-            int rows = scn.nextInt();
-            int cols = scn.nextInt();
-            if (rows < 3 || cols < 3) {
+            int[] rowsAndCols;
+            try {
+                rowsAndCols = Stream.generate(scn::next).limit(2).mapToInt(Integer::parseInt).toArray();
+            } catch (NumberFormatException e) {
+                System.out.println("Incorrect input, please try again.");
+                continue;
+            }
+            if (rowsAndCols[0] < 3 || rowsAndCols[1] < 3) {
                 System.out.println("Incorrect input, maze size should be at least 3x3, please try again.");
             } else {
-                return new int[]{rows, cols};
+                return rowsAndCols;
             }
         }
     }
