@@ -14,10 +14,11 @@ public class View {
 
     public void run() {
         var scn = new Scanner(System.in);
-        mainMenu(scn);
+        var mazeSolver = new MazeSolver();
+        mainMenu(scn, mazeSolver);
     }
 
-    private void mainMenu(Scanner scn) {
+    private void mainMenu(Scanner scn, MazeSolver mazeSolver) {
         boolean mazeInitialized = false;
         while (true) {
             System.out.println("== Menu ==\n"
@@ -25,7 +26,8 @@ public class View {
                     + "2. Load a maze");
             if (mazeInitialized) {
                 System.out.println("3. Save the maze\n"
-                        + "4. Display the maze");
+                        + "4. Display the maze\n"
+                        + "5. Find the escape");
             }
             System.out.println("0. Exit");
 
@@ -37,7 +39,7 @@ public class View {
             switch (option) {
                 case "1" -> {
                     lastMaze = generateNewMaze(scn);
-                    printMaze(lastMaze);
+                    printMaze(formatMaze(lastMaze, false));
                     mazeInitialized = true;
                 }
                 case "2" -> {
@@ -55,7 +57,8 @@ public class View {
                         System.out.println("Error, something went wrong!");
                     }
                 }
-                case "4" -> printMaze(lastMaze);
+                case "4" -> printMaze(formatMaze(lastMaze, false));
+                case "5" -> printMaze(formatMaze(mazeSolver.findPathFromEntranceToExit(lastMaze), true));
                 case "0" -> {
                     return;
                 }
@@ -67,7 +70,7 @@ public class View {
 
     private List<StringBuilder> generateNewMaze(Scanner scn) {
         int[] size = getMazeSizeFromConsole(scn);
-        return formatMaze(MazeGenerator.generateMaze(size[0], size[1]));
+        return MazeGenerator.generateMaze(size[0], size[1]);
     }
 
     public static void saveMazeToFile(List<StringBuilder> maze, String filePath) throws IOException {
@@ -88,13 +91,19 @@ public class View {
         return scn.next().trim();
     }
 
-    public static List<StringBuilder> formatMaze(List<StringBuilder> maze) {
+    public static List<StringBuilder> formatMaze(List<StringBuilder> maze, boolean showSolution) {
         List<StringBuilder> formattedMaze = new ArrayList<>(maze.size());
         for (StringBuilder row : maze) {
             var sbRow = new StringBuilder();
             for (char elem : row.toString().toCharArray()) {
                 if (elem == ' ') {
                     sbRow.append("  ");
+                } else if (elem == '/') {
+                    if (showSolution) {
+                        sbRow.append("//");
+                    } else {
+                        sbRow.append("  ");
+                    }
                 } else {
                     sbRow.append("##"); // or change to - "\u2588\u2588"
                 }
